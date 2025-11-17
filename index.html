@@ -1,0 +1,1824 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Orbital Simulator KSP UI Avanzata e Stabile - STILE KERBAL V15</title>
+        <style>
+            /* * FONT PERSONALIZZATO IN STILE LCD/TECNOLOGICO */
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+            body{
+                margin:0;
+                overflow:hidden;
+                background:#000;
+                color:#fff;
+                font-family: 'Orbitron', monospace; /* Questo assicura che l'UI HTML sia corretta */
+                background-image: url(stars.jpg); /* Immagine di sfondo */
+            }
+            canvas{display:block}
+
+            /* * STILE GENERALE PER TUTTI I PANNELLI */
+            .ksp-panel {
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                padding: 10px;
+                box-sizing: border-box;
+                font-size: 14px;
+            }
+            .label {
+                color: #99FF99;
+                font-weight: 500;
+            }
+            .ui-group {
+                margin-bottom: 8px;
+            }
+            .ksp-panel hr { border-color: #555; margin: 8px 0; }
+
+            /* ------------------------------------------- */
+            /* NUOVI POSIZIONAMENTI UI */
+            /* ------------------------------------------- */
+
+            /* 1. TOP-CENTER: HUD Primario (Pitch, Roll, Warp) */
+            #top-center-hud {
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 280px; /* AUMENTATO per Pitch e Roll sulla stessa linea */
+                padding: 10px 15px;
+                text-align: center;
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                z-index: 100;
+            }
+            #pitch-roll-container {
+                justify-content: space-between;
+                font-size: 1.1em;
+                font-weight: bold;
+                color: #00FF00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                margin-bottom: 5px;
+            }
+
+            /* Stile Time Warp - Reso più compatto */
+            #warp-control-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 5px;
+                gap: 5px;
+                color: #00AAFF;
+            }
+            #warp {
+                font-size: 1.3em;
+                font-weight: bold;
+                min-width: 40px;
+                text-align: center;
+                color: white;
+            }
+            .warp-button {
+                background: #555;
+                color: white;
+                border: none;
+                padding: 3px 8px;
+                cursor: pointer;
+                border-radius: 4px;
+                font-size: 16px;
+                line-height: 1;
+                transition: background 0.1s;
+                outline: none;
+            }
+            .warp-button:hover {
+                background: #888;
+            }
+
+            /* 2. TOP-LEFT: Mission Status */
+            #mission-status-box { position: absolute; top: 10px; left: 10px; width: 200px; padding: 8px; }
+
+            /* 3. TOP-RIGHT: Telemetria Critica */
+            #critical-telemetry-box { position: absolute; top: 10px; right: 10px; width: 180px; text-align: right; padding: 8px; }
+
+            /* 4. BOTTOM-RIGHT: Dettagli Orbitali */
+            #detailed-telemetry-box { position: absolute; top: 10px; right: 210px; width: 220px; padding: 10px; }
+
+            /* 5. BOTTOM-LEFT: Minimappa & Controlli Focus */
+            #minimap-group {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #camera-focus-controls {
+                display: flex;
+                gap: 5px;
+                margin-bottom: 5px;
+            }
+            .focus-button {
+                background: #333;
+                color: white;
+                border: 2px solid #555;
+                padding: 4px 8px;
+                cursor: pointer;
+                border-radius: 4px;
+                font-family: 'Orbitron', monospace;
+                font-size: 11px;
+                font-weight: bold;
+            }
+            .focus-button.active {
+                background: #00AAFF;
+                border-color: white;
+                color: black;
+                box-shadow: 0 0 5px #00AAFF;
+            }
+            #minimap-container {
+                border: 3px solid #666;
+                background: rgba(40, 40, 40, 0.9);
+                border-radius: 8px;
+                padding: 5px;
+            }
+
+
+            /* 6. BOTTOM-CENTER: Pannello Avionica Orizzontale (SAS + NavBall) */
+            #avionics-panel-wrapper {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: flex-end;
+            }
+
+            #avionics-panel {
+                display: flex;
+                background: rgba(25, 25, 25, 0.95);
+                border: 4px solid #444;
+                border-radius: 10px;
+                box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 0, 0.15);
+                padding: 10px;
+            margin-left: 90px;
+                }
+
+            /* Griglia SAS a sinistra (3x2) */
+            #sas-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 45px);
+                gap: 5px;
+                padding-right: 15px;
+                padding-bottom: 5px;
+                height: 100px;
+            }
+
+            .sas-button {
+                width: 45px;
+                height: 45px;
+                background: #333;
+                color: #eee;
+                border: 2px solid #555;
+                border-radius: 5px;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.1s, border-color 0.1s;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                font-size: 9px;
+                font-family: 'Orbitron', monospace;
+                z-index: 20;
+                padding: 1px;
+                box-sizing: border-box;
+            }
+            .sas-button:hover { background: #444; border-color: #999; }
+            .sas-button.active { background: #00FF00; color: black; border-color: white; box-shadow: 0 0 8px #00FF00; }
+            .sas-icon { font-size: 18px; font-weight: bold; line-height: 1; }
+            .sas-label { font-size: 8px; font-weight: bold; line-height: 1; margin-top: 1px; }
+
+            /* NavBall a Destra - RIDOTTO A 125px */
+            #navball-container {
+                width: 100px;
+                height: 100px;
+                border: 5px solid #666;
+                border-radius: 50%;
+                overflow: hidden;
+                background: #111;
+                position: relative;
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 255, 255, 0.1);
+                z-index: 10;
+            }
+
+                /* ------------------------------------------- */
+            /* 7. SLIDER MANETTA (Throttle) */
+            /* ------------------------------------------- */
+            #throttle-control {
+                position: absolute;
+                top: 50%; /* Centro verticale */
+                left: 10px; /* Bordo sinistro */
+                transform: translateY(-50%); /* Sposta verso l'alto della metà della sua altezza */
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                padding: 10px 5px;
+                z-index: 100;
+                width: 30px; /* Larghezza del pannello */
+                height: 300px; /* Altezza del pannello */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #throttle-display {
+                font-weight: bold;
+                margin-bottom: 5px;
+                font-size: 1em;
+            }
+
+            /* Stile Personalizzato per il Range Slider Verticale */
+            /* Stile Personalizzato per il Range Slider Verticale */
+            /* ------------------------------------------- */
+            /* 7. SLIDER MANETTA (Throttle) - Orizzontale a Sinistra */
+            /* ------------------------------------------- */
+            /* ------------------------------------------- */
+            /* NUOVI BLOCCHI RISORSE */
+            /* ------------------------------------------- */
+
+            /* 8. BARRE RISORSE (Carburante, Oxidizer, Monoprop) */
+            #resource-display {
+                position: absolute;
+                top: 50%; /* Allineato verticalmente con la Manetta */
+                left: 215px; /* Posizionato appena a destra del pannello Manetta (200px + margine) */
+                transform: translateY(-50%);
+                z-index: 100;
+
+                /* Nuovo pannello contenitore per le barre */
+                display: flex;
+                flex-direction: column;
+                gap: 10px; /* Spazio tra le barre */
+
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                padding: 8px;
+            }
+
+            .resource-bar-container {
+                width: 25px; /* Larghezza delle barre verticali */
+                height: 150px; /* Altezza totale della barra */
+                background: #111;
+                border: 1px solid #444;
+                border-radius: 4px;
+                position: relative;
+                display: flex;
+                flex-direction: column-reverse; /* Riempimento dal basso verso l'alto */
+                overflow: hidden;
+            }
+            .resource-bar-container .label {
+                position: absolute;
+                top: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 9px;
+                font-weight: bold;
+                color: #99FF99;
+            }
+            .resource-fill {
+                width: 100%;
+                /* L'altezza sarà controllata via JavaScript/inline style per simulare il livello */
+                transition: height 0.5s ease-out;
+            }
+            /* Colori Specifici KSP-Style */
+            #lf-fill { background: #00AAFF; } /* Blu - Liquid Fuel */
+            #ox-fill { background: #FF3333; } /* Rosso - Oxidizer */
+            #rcs-fill { background: #00FFCC; } /* Ciano/Aqua - Monopropellant */
+
+            /* 9. PANNELLO ENERGIA (Sotto Telemetria Critica) */
+            #electric-panel-box {
+                position: absolute;
+                bottom: 370px; /* Spostato sotto critical-telemetry-box (circa 10px + 180px altezza) */
+                right: 10px;
+                width: 180px;
+                text-align: right;
+                padding: 8px;
+            }
+            #battery-charge {
+                font-size: 1.1em;
+                font-weight: bold;
+                color: #FFD700; /* Giallo per l'energia */
+            }
+
+            /* ⭐ Regola il posizionamento del pannello Manetta per fare spazio */
+            #throttle-control {
+                position: absolute;
+            top:45px;
+                left: 0px;
+                transform: translateY(-50%);
+                width: 50px; /* Ridotta la larghezza per renderlo verticale */
+                height: 140px; /* Reso verticale */
+                padding: 20px 10px;
+                background-color: #444;
+                /* Ri-orientato in verticale */
+                flex-direction: column-reverse; /* Slider in basso, display in alto */
+                justify-content: space-between;
+                align-items: center;
+                margin-left: 0;
+                margin-top: 0;
+            }
+            #throttle-slider {
+                /* Riporta lo slider in verticale ruotandolo */
+                -webkit-appearance: slider-vertical;
+                -moz-appearance: slider-vertical;
+                appearance: slider-vertical;
+
+                transform: rotate(180deg); /* Rotato per riempire dal basso */
+                width: 10px;
+                height: 90%;
+                margin: 0;
+
+                background: transparent;
+                cursor: pointer;
+            }
+            /* Regola lo stile della traccia per verticale */
+            #throttle-slider::-webkit-slider-runnable-track {
+                width: 10px;
+                height: 100%;
+                background: linear-gradient(to top, #444, #888);
+            }
+            #throttle-slider::-moz-range-track {
+                width: 10px;
+                height: 100%;
+                background: linear-gradient(to top, #444, #888);
+            }
+            /* Regola lo stile del thumb per verticale */
+            /* Regola lo stile del thumb per verticale */
+            #throttle-slider::-webkit-slider-thumb {
+                /* I margini rimangono come li hai impostati */
+                margin-top: 0;
+                margin-left: -5px;
+
+                /* ⭐ NUOVO COLORE DI DEFAULT (A riposo) */
+                background: #CCCCCC; /* Esempio: Grigio metallico */
+
+                /* Rimuovi !important se non strettamente necessario, altrimenti lascialo */
+                /* background: #CCCCCC !important; */
+
+                border: 1px solid #999; /* Aggiunge un bordo per renderlo più visibile */
+                width: 20px;
+                height: 20px;
+                border-radius: 49%;
+            }
+
+            #throttle-slider::-moz-range-thumb {
+                /* I margini rimangono come li hai impostati */
+                margin-top: 0;
+                margin-left: -5px;
+
+                /* ⭐ NUOVO COLORE DI DEFAULT (A riposo) */
+                background: #CCCCCC; /* Esempio: Grigio metallico */
+
+                /* Rimuovi !important se non strettamente necessario, altrimenti lascialo */
+                /* background: #CCCCCC !important; */
+
+                border: 1px solid #999;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+            }
+            #throttle-control .label {
+                order: 2; /* Sposta l'etichetta in basso (visivamente) */
+            }
+            #throttle-display {
+                order: 1; /* Sposta il display in alto */
+            }
+
+                .solar-indicator {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 2px;
+            }
+
+            .solar-bar {
+                width: 8px;
+                height: 10px;
+                margin-left: 2px;
+                background-color: #333;
+                border: 1px solid #000;
+                transition: background-color 0.3s;
+                border-radius: 1px;
+            }
+
+                /* Stile Tasso di Carica/Scarica (Charge Rate) */
+            #charge-rate {
+                font-family: 'Orbitron', monospace;
+                font-size: 11px;
+                width: 100px;
+                text-align: right;
+            }
+
+            /* Stile Barra Principale Batteria (facoltativo, ma utile per il visual) */
+            #battery-main-bar {
+                border-radius: 2px;
+            }
+            #battery-bar-fill {
+                /* La transizione è già inline, ma puoi definirla qui se preferisci */
+                border-radius: 2px;
+                background-color: #0088CC; /* Blu per l'energia */
+            }
+
+#experiments-panel {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    padding: 10px;
+    z-index: 10;
+}
+
+#experiment-status {
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #333;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.exp-button {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+    background-color: #3f6f3f; /* Verde Scienza */
+    border: none!important;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: none!important;
+}
+
+.exp-button:hover:not(:disabled) {
+    background-color: #5aa15a;
+}
+
+.exp-button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+.log-box {
+    margin-top: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    max-height: 75px;
+    height: 75px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    background-color: #111;
+    font-size: 0.8em;
+}
+
+.log-entry {
+    border-bottom: 1px dotted #333;
+    padding: 2px 0;
+}
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+/* --- STILI SCROLLBAR AGGIUNTI QUI --- */
+.log-box::-webkit-scrollbar {
+    width: 8px; /* Larghezza della barra verticale */
+}
+
+.log-box::-webkit-scrollbar-track {
+    background: #1e1e1e; /* Sfondo della traccia della barra (molto scuro) */
+    border-radius: 10px;
+}
+
+.log-box::-webkit-scrollbar-thumb {
+    background: #4a4a4a; /* Colore del "pollice" (la parte che si muove) */
+    border-radius: 10px;
+}
+
+.log-box::-webkit-scrollbar-thumb:hover {
+    background: #6e6e6e; /* Colore al passaggio del mouse */
+}
+            
+            #audio-toggle-button {
+    position: absolute;
+    top: 10px; /* Distanza dall'alto */
+    right: 10px; /* Distanza da destra */
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #555;
+    color: white;
+    border: 2px solid #aaa;
+    border-radius: 5px;
+    z-index: 100; /* Assicurati che sia sopra il canvas */
+    padding: 0;
+}
+
+#audio-toggle-button.active {
+    background-color: #3f6f3f; /* Colore attivo (verde scienza) */
+}
+        </style>
+    </head>
+    <body>
+
+        <canvas id="game"></canvas>
+
+        <div id="top-center-hud" class="ksp-panel">
+            <div id="pitch-roll-container">
+                <span>PITCH: <span id="nav-pitch">0°</span> // </span>
+                <span>ROLL: <span id="nav-roll">0°</span></span>
+            </div>
+
+            <hr />
+
+            <div id="warp-control-container">
+                <button id="warp-down" class="warp-button"><</button>
+                <span id="warp">1x</span>
+                <button id="warp-up" class="warp-button">></button>
+            </div>
+        </div>
+
+        <div id="mission-status-box" class="ksp-panel">
+            <div class="ui-group">
+                <div class="stat-row">
+                    <span class="label">Target:</span>
+                    <span id="target" class="stat-value">Sole</span>
+                </div>
+                <div class="stat-row">
+                    <span class="label">Stato:</span>
+                    <span id="orbitStatus" class="stat-value">Orbita Stabile</span>
+                </div>
+                <hr />
+
+                <div class="stat-row">
+                    <span class="label">Velocità di Fuga:</span>
+                    <span id="Vesc" class="stat-value">N/A</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="critical-telemetry-box" class="ksp-panel">
+            <div class="label">ALTITUDINE (M)</div>
+            <div class="value"><span id="dist"></span></div>
+            <hr />
+            <div class="label">VELOCITÀ (M/S)</div>
+            <div class="value"><span id="speed"></span></div>
+            <hr />
+            <div class="label">ACCEL (G)</div>
+            <div class="value"><span id="accel"></span></div>
+        </div>
+
+        <div id="detailed-telemetry-box" class="ksp-panel">
+            <div class="ui-group">
+                <div><span class="label">Periapside: </span> <span id="Pe"></span></div>
+                <div><span class="label">Apoapside: </span> <span id="Ap"></span></div>
+                <hr>
+                <div><span class="label">Periodo orboita: </span> <span id="orbPeriod"></span></div>
+                <div><span class="label">Energia orbita: </span> <span id="energy"></span></div>
+                <hr />
+            </div>
+            <div><span class="label">Spinta: </span> <span id="thrust"></span></div>
+        </div>
+
+        <div id="electric-panel-box" class="resource-item ksp-panel">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px">
+                <label class="label">Battery</label>
+                <span id="charge-rate" class="value">0.0 A</span>
+            </div>
+
+            <div style="display: flex; gap: 5px">
+                <div
+                    id="battery-main-bar"
+                    style="
+                        width: 15px;
+                        height: 50px;
+                        background-color: #333;
+                        border: 1px solid #666;
+                        position: relative;
+                    ">
+                    <div
+                        id="battery-bar-fill"
+                        style="
+                            position: absolute;
+                            bottom: 0;
+                            width: 100%;
+                            background-color: #0088cc;
+                            transition: height 0.3s;
+                        "></div>
+                </div>
+
+                <div style="flex-grow: 1">
+                    <label>Charge:</label>
+                    <span id="battery-charge" class="value" style="display: block; font-size: 14px; margin-bottom: 5px"
+                        >10000 EC</span
+                    >
+
+                    <label>Pannelli solari:</label>
+                    <div id="solar-bars" class="solar-indicator"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="minimap-group">
+            <div id="camera-focus-controls">
+                <button id="focus-ship" class="focus-button active">SHIP</button>
+                <button id="focus-target" class="focus-button">TGT</button>
+            </div>
+            <div id="minimap-container">
+                <canvas id="minimap"></canvas>
+            </div>
+        </div>
+
+        <div id="avionics-panel-wrapper">
+            <div id="avionics-panel">
+                <div id="left-panel">
+                    <div id="avionics-controls" class="panel-box"></div>
+
+                    <div id="throttle-control" class="panel-box">
+                        <input type="range" id="throttle-slider" min="0" max="100" value="0" />
+                        <div class="label" id="throttle-display">0%</div>
+                    </div>
+                </div>
+                <div id="sas-grid">
+                    <button id="sas-target" class="sas-button" data-mode="target">
+                        <span class="sas-icon">⦿</span>
+                        <span class="sas-label">TGT</span>
+                    </button>
+                    <button id="sas-prograde" class="sas-button" data-mode="prograde">
+                        <span class="sas-icon">▶</span>
+                        <span class="sas-label">PRG</span>
+                    </button>
+                    <button id="sas-retrograde" class="sas-button" data-mode="retrograde">
+                        <span class="sas-icon">◀</span>
+                        <span class="sas-label">RET</span>
+                    </button>
+
+                    <button id="sas-normal" class="sas-button" data-mode="normal">
+                        <span class="sas-icon">▲</span>
+                        <span class="sas-label">NRM</span>
+                    </button>
+                    <div style="width: 45px; height: 45px"></div>
+                    <button id="sas-antinormal" class="sas-button" data-mode="antinormal">
+                        <span class="sas-icon">▼</span>
+                        <span class="sas-label">ANR</span>
+                    </button>
+                </div>
+
+                <div id="navball-container">
+                    <canvas id="navball-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+<div id="experiments-panel" class="ksp-panel control-panel">
+    <div id="experiment-status">Nessun esperimento in corso.</div>
+        <button id="run-temp-exp" class="exp-button sas-button" data-exp-type="temp">Rileva Temperatura</button>
+        <button id="run-press-exp" class="exp-button sas-button" data-exp-type="press">Misura Pressione</button>
+        <button id="run-rad-exp" class="exp-button sas-button">Misura Radiazione ☢️</button>
+<button id="run-sample-exp" class="exp-button sas-button">Qualità aria</button>
+    <div id="experiment-result-log" class="log-box"></div>
+</div>
+
+        <script type="module">
+
+            const canvas = document.getElementById("game"),
+                ctx = canvas.getContext("2d");
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+
+            let scale = 1.0;
+            const MIN_SCALE = 0.1;
+            const MAX_SCALE = 10.0;
+            const ZOOM_SPEED = 0.1;
+            const SHIP_SIZE_PERSISTENCE = 0.5;
+
+            window.addEventListener("wheel", (e) => {
+            
+                e.preventDefault();
+
+                if (e.deltaY < 0) {
+                    // Rotellina in alto (Zoom In)
+                    scale = Math.min(MAX_SCALE, scale + ZOOM_SPEED);
+                } else {
+                    // Rotellina in basso (Zoom Out)
+                    scale = Math.max(MIN_SCALE, scale - ZOOM_SPEED);
+                }
+            });
+
+            const rocketImg = new Image();
+            rocketImg.src = "rocket.png";
+            const ROCKET_WIDTH = 15;
+            const ROCKET_HEIGHT = 25;
+            let rocketLoaded = false;
+
+            rocketImg.onload = () => {
+                rocketLoaded = true;
+            };
+
+            const planetTextures = {};
+            const textureNames = {
+                Sole: "2dsole.png",
+                Mercurio: "2dmercurio.png",
+                Marte: "2dmarte.png",
+                Terra: "2dterra.png",
+                Giove: "2dgiove.png"
+            };
+
+            let texturesLoadedCount = 0;
+            const totalTextures = Object.keys(textureNames).length;
+
+            function loadTextures() {
+                for (const name in textureNames) {
+                    const img = new Image();
+                    img.src = textureNames[name];
+                    img.onload = () => {
+                        texturesLoadedCount++;
+                    };
+                    img.onerror = () => {
+                        console.error(`Errore nel caricamento di ${textureNames[name]} per ${name}.`);
+                    };
+                    planetTextures[name] = img;
+                }
+            }
+            loadTextures();
+
+            const minimapCanvas = document.getElementById("minimap");
+            const mtx = minimapCanvas.getContext("2d");
+            const MAP_SIZE = 100;
+            minimapCanvas.width = MAP_SIZE;
+            minimapCanvas.height = MAP_SIZE;
+            const MAP_CENTER_X = MAP_SIZE / 2;
+            const MAP_CENTER_Y = MAP_SIZE / 2;
+
+            const navballCanvas = document.getElementById("navball-canvas");
+            const navCtx = navballCanvas.getContext("2d");
+            const NAV_SIZE = 100;
+            navballCanvas.width = NAV_SIZE;
+            navballCanvas.height = NAV_SIZE;
+            const NAV_CENTER = NAV_SIZE / 2;
+            const NAV_RADIUS = NAV_SIZE / 2;
+
+            let dt = 1 / 240,
+                G = 0.5,
+                timeWarp = 1,
+                paused = false;
+            let sasMode = null;
+            let cameraTarget = "ship";
+            
+            
+            let currentExperiment = null; // { type: 'temp'|'press', startTime: 0, duration: 0, target: planetName, altitude: 0 }
+const EXP_DURATION = 1; // Durata base dell'esperimento in secondi di gioco
+const EXP_ENERGY_COST = 20.0; // Consumo EC/secondo durante l'esperimento
+
+// Definizioni Esperimenti
+const EXPERIMENTS = {
+    'temp': {
+        name: 'Rileva Temperatura',
+        baseConsumption: EXP_ENERGY_COST,
+        duration: EXP_DURATION,
+    },
+    'press': {
+        name: 'Misura Pressione',
+        baseConsumption: EXP_ENERGY_COST * 1.5, // Leggermente più esigente
+        duration: EXP_DURATION * 3,
+    },
+    'rad': {
+        name: 'Misura Radiazione',
+        baseConsumption: EXP_ENERGY_COST * 0.8, // Leggermente meno esigente
+        duration: EXP_DURATION * 4,
+    },
+    'sample': {
+        name: 'Qualita aria',
+        baseConsumption: EXP_ENERGY_COST * 1.5, // Richiede molta energia
+        duration: EXP_DURATION * 5, // Richiede tempo
+    }
+};
+
+let gameTime = 0;
+            
+
+            // Variabile per la manetta fissa (slider)
+            let fixedThrottle = 0; // ⭐ NUOVO: Manetta fissa (0.0 a 1.0)
+            let impulseThrust = 0; // ⭐ NUOVO: Spinta temporanea (0.0 a 1.0)
+
+            const keys = {};
+            onkeydown = (e) => {
+                keys[e.key] = true;
+                if (e.key === " ") paused = !paused;
+                if (e.key === ">") changeTimeWarp(1);
+                if (e.key === "<") changeTimeWarp(-1);
+
+                // Gestione Manetta W/S (Override slider solo per impulso W)
+                if (e.key === "w") impulseThrust = 1; // ⭐ Impulso Max
+                if (e.key === "s") fixedThrottle = 0; // ⭐ S azzera la manetta fissa
+            };
+            onkeyup = (e) => {
+                keys[e.key] = false;
+                if (e.key === "w") impulseThrust = 0; // ⭐ Rilasciando W, l'impulso cessa
+            };
+
+            function changeTimeWarp(direction) {
+                if (direction > 0) {
+                    timeWarp = Math.min(256, timeWarp * 2);
+                } else if (direction < 0) {
+                    timeWarp = Math.max(1, timeWarp / 2);
+                }
+                document.getElementById("warp").textContent = `${timeWarp}x`;
+            }
+
+            document.getElementById("warp-up").addEventListener("click", () => changeTimeWarp(1));
+            document.getElementById("warp-down").addEventListener("click", () => changeTimeWarp(-1));
+
+            document.getElementById("focus-ship").addEventListener("click", () => setCameraFocus("ship"));
+            document.getElementById("focus-target").addEventListener("click", () => setCameraFocus("target"));
+
+            function setCameraFocus(mode) {
+                cameraTarget = mode;
+                document.getElementById("focus-ship").classList.remove("active");
+                document.getElementById("focus-target").classList.remove("active");
+                document.getElementById("focus-" + mode).classList.add("active");
+            }
+
+            document.querySelectorAll(".sas-button").forEach((button) => {
+                button.addEventListener("click", function () {
+                    const mode = this.dataset.mode;
+                    if (sasMode === mode) {
+                        sasMode = null;
+                    } else {
+                        sasMode = mode;
+                    }
+                    updateSASButtons();
+                });
+            });
+
+            
+            // --- LOGICA ESPERIMENTI ---
+
+function startExperiment(expType) {
+    if (currentExperiment) {
+        addLog('Errore: Un esperimento è già in corso!', 'red');
+        return;
+    }
+    
+    const expData = EXPERIMENTS[expType];
+    
+    // Calcola l'energia richiesta
+    const requiredEnergy = expData.duration * expData.baseConsumption;
+    if (electricCharge < requiredEnergy) {
+        addLog(`Energia insufficiente per ${expData.name}. Servono ${requiredEnergy.toFixed(0)} EC.`, 'red');
+        return;
+    }
+
+    // Disabilita i pulsanti e avvia
+    document.getElementById('run-temp-exp').disabled = true;
+    document.getElementById('run-press-exp').disabled = true;
+
+    // Calcola l'altitudine iniziale per il log
+    const r = Math.hypot(ship.x - ship.target.x, ship.y - ship.target.y);
+    const initialAltitude = Math.max(0, r - ship.target.radius);
+
+    currentExperiment = {
+        type: expType,
+        startTime: gameTime,
+        duration: expData.duration,
+        target: ship.target.name,
+        altitude: initialAltitude // Registra l'altitudine all'inizio
+    };
+
+    addLog(`${expData.name} avviato. Durata: ${expData.duration}s...`, 'lime');
+}
+
+function completeExperiment(expType) {
+    const expData = EXPERIMENTS[expType];
+    const exp = currentExperiment;
+    currentExperiment = null; // Termina l'esperimento
+
+    // Riabilita i pulsanti
+    document.getElementById('run-temp-exp').disabled = false;
+    document.getElementById('run-press-exp').disabled = false;
+
+    // Calcola il risultato finale
+    const result = calculateExperimentResult(exp.type, exp.target, exp.altitude);
+
+    addLog(`${expData.name} completato! Risultato: ${result.value}`, 'yellow');
+    
+    // Aggiungi un log completo al registro
+    const logContainer = document.getElementById('experiment-result-log');
+    if (logContainer) {
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.style.color = 'white';
+        // Usiamo l'altitudine registrata all'inizio dell'esperimento
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}]<br><strong>${expData.name}</strong><br><strong>Risultato</strong>: ${result.value}<br>/////////`;
+        
+        // Aggiunge in cima
+        if (logContainer.querySelector('h4')) {
+            logContainer.querySelector('h4').after(entry);
+        } else {
+            logContainer.appendChild(entry);
+        }
+    }
+}
+
+            //const planet1 = { x: canvas.width / 2 + 3000, y: canvas.height / 2 + 1500, mass: 5000, radius: 50, name: "Terra" };
+            //const planet2 = { x: canvas.width / 2 + 1000, y: canvas.height / 2, mass: 7500, radius: 75, name: "Sole" };
+            //const planet3 = { x: canvas.width / 2 + 5500, y: canvas.height / 2 - 5500, mass: 2500, radius: 25, name: "Marte" };
+            //const planet4 = { x: canvas.width / 2 + 8000, y: canvas.height / 2 + 8500, mass: 3000, radius: 30, name: "Giove" };
+            //const planet5 = { x: canvas.width / 2 + 8500, y: canvas.height / 2 + 7000, mass: 4000, radius: 40, name: "Mercurio"};
+            
+function calculateExperimentResult(type, planetName, altitude) {
+    // Valori base per i pianeti (semplificazione, i valori reali varierebbero enormemente)
+    const baseTemp = { 'Sole': 1500, 'Mercurio': -1200, 'Marte': -200, 'Terra': -40, 'Giove': -900 }; 
+    const basePressure = { 'Sole': 100, 'Mercurio': 0.1, 'Marte': 0.5, 'Terra': 1, 'Giove': 50 };
+    const baseRadiation = { 'Sole': 500, 'Mercurio': 100, 'Marte': 50, 'Terra': 10, 'Giove': 400 }; // mGy/h (arbitrario)
+    const baseSampleMass = { 'Sole': 0, 'Mercurio': 80, 'Marte': 50, 'Terra': 100, 'Giove': 0 }; // Concentrazione di elementi rari (arbitrario)
+    
+
+    // Altitudine di riferimento per il decadimento esponenziale (es. 500 unità)
+    const refAltitude = 500;
+    const altFactor = Math.exp(-altitude / refAltitude); 
+    const isLanded = altitude < 1.0; // Per distinguere il campionamento in orbita da quello sulla superficie
+
+    let resultValue = 0;
+    let unit = '';
+
+    if (type === 'temp') {
+        resultValue = (baseTemp[planetName] || 0) * altFactor;
+        unit = '°C';
+    } else if (type === 'press') {
+        resultValue = (basePressure[planetName] || 0) * altFactor;
+        unit = 'kPa';
+        if (altitude > refAltitude * 10) {
+             return { value: "Vuoto (0 kPa)", raw: 0 };
+        }
+    } else if (type === 'rad') { // ⭐ NUOVO: Radiazione
+        // La radiazione è alta vicino al Sole, poi cala, poi sale nelle cinture di Van Allen (es. Giove).
+        const radBase = baseRadiation[planetName] || 1;
+        
+        // Simula l'effetto della distanza dal Sole/campo magnetico di Giove
+        let radValue = radBase * (1 + (1 - altFactor) / 2); // Aumenta leggermente con l'altitudine se vicino al Sole
+        
+        if (planetName === 'Terra' && altitude < 100 && altitude > 50) {
+             // Simula l'attraversamento di una "cintura" di radiazione terrestre
+             radValue *= 3; 
+        }
+
+        resultValue = radValue;
+        unit = 'mGy/h';
+    } else if (type === 'sample') { // ⭐ NUOVO: Campione
+       
+            // Campionamento in orbita: solo analisi atmosfera/vuoto
+            resultValue = (baseSampleMass[planetName] || 0) * altFactor * 0.1; // Risultato molto basso
+            unit = 'µg/L';
+            return { value: `${resultValue.toFixed(2)} ${unit}<br><strong>Pianeta</strong>: ${planetName}`, raw: resultValue };
+    }
+    
+    return { value: `${resultValue.toFixed(2)} ${unit}<br><strong>Pianeta</strong>: ${planetName}`, raw: resultValue };
+}
+
+function addLog(message, color = 'white') {
+    const statusDiv = document.getElementById('experiment-status');
+    if (statusDiv) {
+        statusDiv.textContent = message;
+        statusDiv.style.color = color;
+    }
+}
+            
+            function updateSASButtons() {
+                document.querySelectorAll(".sas-button").forEach((button) => {
+                    if (button.dataset.mode === sasMode) {
+                        button.classList.add("active");
+                    } else {
+                        button.classList.remove("active");
+                    }
+                });
+            }
+
+            const throttleSlider = document.getElementById("throttle-slider");
+            const throttleDisplay = document.getElementById("throttle-display");
+
+            throttleSlider.addEventListener("input", () => {
+                fixedThrottle = parseFloat(throttleSlider.value) / 100;
+                throttleDisplay.textContent = throttleSlider.value + "%";
+            });
+
+            function getTargetAngle(mode) {
+                /* ... (invariata) ... */
+                const angleV = Math.atan2(ship.vy, ship.vx);
+                const angleR = Math.atan2(ship.target.y - ship.y, ship.target.x - ship.x);
+
+                switch (mode) {
+                    case "prograde":
+                        return angleV;
+                    case "retrograde":
+                        return angleV + Math.PI;
+                    case "normal":
+                        return angleV + Math.PI / 2;
+                    case "antinormal":
+                        return angleV - Math.PI / 2;
+                    case "target":
+                        return angleR;
+                    default:
+                        return ship.angle;
+                }
+            }
+            function totalAccel(x, y, angle, thrust) {
+                /* ... (invariata) ... */
+                let ax = 0,
+                    ay = 0;
+                ALL_PLANETS.forEach((p) => {
+                    const dx = p.x - x,
+                        dy = p.y - y;
+                    const r = Math.hypot(dx, dy);
+                    const f = (G * p.mass) / (r * r * r);
+                    ax += f * dx;
+                    ay += f * dy;
+                });
+                if (thrust > 0) {
+                    ax += (Math.cos(angle) * ship.maxThrust * thrust) / ship.mass;
+                    ay += (Math.sin(angle) * ship.maxThrust * thrust) / ship.mass;
+                }
+                return { ax, ay };
+            }
+            function rk4Step(o, dtStep, thrustOverride = null) {
+                /* ... (invariata) ... */
+                const thrust = thrustOverride ?? o.thrust,
+                    ang = o.angle;
+                const a1 = totalAccel(o.x, o.y, ang, thrust),
+                    v1 = { vx: o.vx, vy: o.vy };
+                const a2 = totalAccel(o.x + (v1.vx * dtStep) / 2, o.y + (v1.vy * dtStep) / 2, ang, thrust);
+                const v2 = { vx: o.vx + (a1.ax * dtStep) / 2, vy: o.vy + (a1.ay * dtStep) / 2 };
+                const a3 = totalAccel(o.x + (v2.vx * dtStep) / 2, o.y + (v2.vy * dtStep) / 2, ang, thrust);
+                const v3 = { vx: o.vx + (a2.ax * dtStep) / 2, vy: o.vy + (a1.ay * dtStep) / 2 };
+                const a4 = totalAccel(o.x + v3.vx * dtStep, o.y + v3.vy * dtStep, ang, thrust);
+                const v4 = { vx: o.vx + a3.ax * dtStep, vy: o.vy + a3.ay * dtStep };
+                o.x += (dtStep * (v1.vx + 2 * v2.vx + 2 * v3.vx + v4.vx)) / 6;
+                o.y += (dtStep * (v1.vy + 2 * v2.vy + 2 * v3.vy + v4.vy)) / 6;
+                o.vx += (dtStep * (a1.ax + 2 * a2.ax + 2 * a3.ax + a4.ax)) / 6;
+                o.vy += (dtStep * (a1.ay + 2 * a2.ay + 2 * a3.ay + a4.ay)) / 6;
+            }
+            function integrate(o) {
+                for (let i = 0; i < Math.ceil(timeWarp); i++) rk4Step(o, dt);
+            }
+            function sasControl() {
+                if (sasMode === null) return;
+
+                const targetAngle = getTargetAngle(sasMode);
+                let angleDiff = targetAngle - ship.angle;
+
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+                const turnRate = 0.04;
+
+                if (Math.abs(angleDiff) > 0.01) {
+                    if (angleDiff > 0) {
+                        ship.angle += Math.min(turnRate, angleDiff);
+                    } else {
+                        ship.angle += Math.max(-turnRate, angleDiff);
+                    }
+                } else {
+                    ship.angle = targetAngle;
+                }
+            }
+
+            let electricCharge = 300.0;
+            const MAX_ELECTRIC_CHARGE = 300.0;
+
+            const SOLAR_CHARGE_RATE_MAX = 50.0; // Max Amperes (EC/sec) generabili vicino al Sole
+            const SOLAR_DISTANCE_REFERENCE = 1000; // Distanza di riferimento per il 100% di efficacia (r0)
+            const EC_TIERS = 5;
+
+            const SAS_CONSUMPTION_RATE = 13.0; // Amperes (EC/sec) consumati quando il SAS è attivo
+
+            let currentChargeRate = 0.0; // Amperes attuali (positivo = carica, negativo = scarica)
+            
+            const planet1 = { x: canvas.width / 2 + 3000, y: canvas.height / 2 + 1500, mass: 5000, radius: 50, name: "Terra" };
+            const planet2 = { x: canvas.width / 2 + 1000, y: canvas.height / 2, mass: 7500, radius: 75, name: "Sole" };
+            const planet3 = { x: canvas.width / 2 + 5500, y: canvas.height / 2 - 5500, mass: 2500, radius: 25, name: "Marte" };
+            const planet4 = { x: canvas.width / 2 + 8000, y: canvas.height / 2 + 8500, mass: 3000, radius: 30, name: "Giove" };
+            const planet5 = { x: canvas.width / 2 + 8500, y: canvas.height / 2 + 7000, mass: 4000, radius: 40, name: "Mercurio"};
+
+            const ALL_PLANETS = [planet1, planet2, planet3, planet4, planet5];
+
+            const SUN_CENTER_X = planet2.x;
+            const SUN_CENTER_Y = planet2.y;
+            const MAX_SYSTEM_RADIUS =
+                Math.max(
+                    Math.hypot(planet1.x - SUN_CENTER_X, planet1.y - SUN_CENTER_Y),
+                    Math.hypot(planet3.x - SUN_CENTER_X, planet3.y - SUN_CENTER_Y),
+                    Math.hypot(planet4.x - SUN_CENTER_X, planet4.y - SUN_CENTER_Y),
+                    Math.hypot(planet5.x - SUN_CENTER_X, planet5.y - SUN_CENTER_Y)
+                ) + 200;
+            const MAP_SCALE = MAX_SYSTEM_RADIUS / (MAP_SIZE / 2);
+
+            let r0 = 150;
+            let v0 = Math.sqrt((G * planet2.mass) / r0);
+            let resourceLF = 1000.0;
+            const MAX_RESOURCE_LF = 1000.0;
+            const LF_CONSUMPTION_RATE = 0.05;
+            const FUEL_MASS_CONVERSION = 0.0005;
+
+            const MANUAL_CONTROL_CONSUMPTION_RATE = 10.0; // Amperes (EC/sec) consumati durante la rotazione A/D
+
+            let ship = {
+                x: planet1.x + r0,
+                y: planet1.y,
+                vx: 0,
+                vy: -v0,
+                angle: -Math.PI / 2,
+                thrust: 0,
+                maxThrust: 0.4,
+                target: planet2,
+                mass: 1.0,
+                dryMass: MAX_RESOURCE_LF * FUEL_MASS_CONVERSION
+            };
+            ship.mass = ship.dryMass + resourceLF * FUEL_MASS_CONVERSION;
+
+            function isSunObstructed(ship, sun, planets) {
+                const obstructionCandidates = planets.filter((p) => p !== sun && p !== ship.target);
+
+                const L_x = sun.x - ship.x; // Vettore Linea Nave -> Sole (L)
+                const L_y = sun.y - ship.y;
+                const L_sq = L_x * L_x + L_y * L_y; // Lunghezza al quadrato del vettore L
+
+                if (L_sq === 0) return false; // Nave e Sole coincidenti (impossibile)
+
+                for (const p of obstructionCandidates) {
+                    const C_x = p.x - ship.x; // Vettore Nave -> Pianeta (C)
+                    const C_y = p.y - ship.y;
+
+                    const t = (C_x * L_x + C_y * L_y) / L_sq;
+
+                    if (t > 0.0 && t < 1.0) {
+                        const P_x = ship.x + t * L_x;
+                        const P_y = ship.y + t * L_y;
+
+                        const d_sq = Math.pow(p.x - P_x, 2) + Math.pow(p.y - P_y, 2);
+
+                        if (d_sq < p.radius * p.radius) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function update() {
+                
+                   gameTime += dt * timeWarp; 
+    
+    if (currentExperiment) {
+        const elapsed = gameTime - currentExperiment.startTime;
+        const remaining = currentExperiment.duration - elapsed;
+
+        if (remaining <= 0) {
+            completeExperiment(currentExperiment.type);
+        }
+        // Il consumo di energia viene aggiunto più avanti in totalConsumption.
+    }
+                let manualConsumptionActive = false;
+                
+                let manualControl = keys["a"] || keys["d"];
+
+                if (keys["a"]) {
+                    ship.angle -= 0.04;
+                    manualControl = true;
+                    manualConsumptionActive = true;
+                }
+                if (keys["d"]) {
+                    ship.angle += 0.04;
+                    manualControl = true;
+                    manualConsumptionActive = true;
+                }
+
+                if (manualControl && sasMode !== null) {
+                    sasMode = null;
+                    updateSASButtons();
+                }
+
+                if (!manualControl) {
+                    sasControl();
+                }
+                let requestedThrust = Math.max(fixedThrottle, impulseThrust);
+                const actualConsumptionRate = LF_CONSUMPTION_RATE * requestedThrust;
+                const consumptionAmount = actualConsumptionRate * dt * timeWarp;
+                if (resourceLF > 0) {
+                    resourceLF = Math.max(0, resourceLF - consumptionAmount);
+                    ship.thrust = requestedThrust;
+                    const currentFuelMass = resourceLF * FUEL_MASS_CONVERSION;
+                    ship.mass = ship.dryMass + currentFuelMass;
+                } else {
+                    resourceLF = 0;
+                    ship.thrust = 0;
+                    ship.mass = ship.dryMass;
+                }
+                const sun = planet2;
+                const dx = ship.x - sun.x;
+                const dy = ship.y - sun.y;
+                const distToSun = Math.hypot(dx, dy);
+                let solarGeneration = 0.0;
+                const solarFactor = Math.min(
+                    1.0,
+                    (SOLAR_DISTANCE_REFERENCE * SOLAR_DISTANCE_REFERENCE) / (distToSun * distToSun)
+                );
+                const isObstructed = isSunObstructed(ship, sun, ALL_PLANETS);
+                if (!isObstructed) {
+                    solarGeneration = SOLAR_CHARGE_RATE_MAX * solarFactor;
+                }
+// ... (dopo il calcolo di solarGeneration e isObstructed) ...
+
+    let totalConsumption = 0.0; 
+    if (sasMode != null) {
+        totalConsumption += SAS_CONSUMPTION_RATE;
+    }
+    if (manualConsumptionActive) {
+        totalConsumption += MANUAL_CONTROL_CONSUMPTION_RATE;
+    }
+
+    // ⭐ AGGIUNTA: Consumo Esperimento ⭐
+    if (currentExperiment) {
+        totalConsumption += EXPERIMENTS[currentExperiment.type].baseConsumption;
+    }
+
+    currentChargeRate = solarGeneration - totalConsumption;
+                
+    const ecDelta = currentChargeRate * dt * timeWarp;
+                
+                electricCharge += ecDelta;
+                electricCharge = Math.min(MAX_ELECTRIC_CHARGE, Math.max(0, electricCharge));
+                
+                // CONTROLLO ENERGIA Elettrica (SAS Safety Shutdown)
+if (electricCharge <= 0 && sasMode != null) {
+    sasMode = null; // Disattiva il SAS
+    updateSASButtons(); // Aggiorna l'interfaccia utente
+}
+                
+                integrate(ship);
+                
+                let nearest = planet1;
+                let minD = Infinity;
+                ALL_PLANETS.forEach((p) => {
+                    const d = Math.hypot(ship.x - p.x, ship.y - p.y);
+                    if (d < minD) {
+                        minD = d;
+                        nearest = p;
+                    }
+                });
+                ship.target = nearest;
+            }
+
+            function drawPlanet(p, context = ctx) {
+                context.save();
+                context.translate(p.x, p.y);
+                const r = p.radius;
+                const texture = planetTextures[p.name];
+                if (texture && texture.complete) {
+                    context.beginPath();
+                    context.arc(0, 0, r, 0, Math.PI * 2);
+                    context.clip();
+                    context.drawImage(texture, -r, -r, r * 2, r * 2);
+                } else {
+                    // Fallback
+                    context.beginPath();
+                    context.arc(0, 0, r, 0, Math.PI * 2);
+                    let fallbackColor = "gray";
+                    if (p.name === "Sole") fallbackColor = "gold";
+                    if (p.name === "Terra") fallbackColor = "deepskyblue";
+                    if (p.name === "Marte") fallbackColor = "tomato";
+                    if (p.name === "Giove") fallbackColor = "orange";
+                    context.fillStyle = fallbackColor;
+                    context.fill();
+                }
+                context.restore();
+            }
+
+            function drawShip(context = ctx) {
+                context.save();
+                context.translate(ship.x, ship.y);
+                context.rotate(ship.angle + Math.PI / 2);
+                const shipActualScaleFactor = Math.pow(1 / scale, SHIP_SIZE_PERSISTENCE);
+                const w = ROCKET_WIDTH * shipActualScaleFactor;
+                const h = ROCKET_HEIGHT * shipActualScaleFactor;
+                if (rocketLoaded) {
+                    context.drawImage(rocketImg, -w / 2, -h / 2, w, h);
+                } else {
+                    context.fillStyle = "white";
+                    context.fillRect(-w / 2, -w / 2, w, w);
+                }
+
+                if (ship.thrust > 0) {
+                    const flameBaseWidth = w * 0.6;
+                    const flameLength = ROCKET_HEIGHT * 0.7 * ship.thrust * shipActualScaleFactor;
+                    const gradient = context.createRadialGradient(
+                        0,
+                        h / 2 + flameLength * 0.3,
+                        1,
+                        0,
+                        h / 2 + flameLength * 0.3,
+                        flameBaseWidth * 0.6
+                    );
+                    gradient.addColorStop(0, "rgba(255, 255, 150, 0.9)");
+                    gradient.addColorStop(0.3, "rgba(255, 165, 0, 0.8)");
+                    gradient.addColorStop(0.7, "rgba(255, 69, 0, 0.6)");
+                    gradient.addColorStop(1, "rgba(255, 100, 0, 0.0)");
+                    context.fillStyle = gradient;
+                    context.beginPath();
+                    context.moveTo(-flameBaseWidth / 2, h / 2);
+                    context.lineTo(flameBaseWidth / 2, h / 2);
+                    context.lineTo(0, h / 2 + flameLength);
+                    context.closePath();
+                    context.fill();
+                }
+                context.restore();
+            }
+
+            function getOrbitPoints() {
+                const target = ship.target;
+                const mu = G * target.mass;
+                const r_x = ship.x - target.x;
+                const r_y = ship.y - target.y;
+                const r = Math.hypot(r_x, r_y);
+                const v_x = ship.vx;
+                const v_y = ship.vy;
+                const v = Math.hypot(v_x, v_y);
+                const energy = (v * v) / 2 - mu / r;
+
+                if (energy < -1e-5) {
+                    const a = -mu / (2 * energy);
+                    const h = r_x * v_y - r_y * v_x;
+                    const e = Math.sqrt(1 - (h * h) / (mu * a));
+                    const r_ap = a * (1 + e);
+                    const r_pe = a * (1 - e);
+                    const v_cross_h_x = v_y * h;
+                    const v_cross_h_y = -v_x * h;
+                    const e_x = v_cross_h_x / mu - r_x / r;
+                    const e_y = v_cross_h_y / mu - r_y / r;
+                    const anglePe = Math.atan2(e_y, e_x);
+                    const Pe_x = target.x + r_pe * Math.cos(anglePe);
+                    const Pe_y = target.y + r_pe * Math.sin(anglePe);
+                    const Ap_x = target.x + r_ap * Math.cos(anglePe + Math.PI);
+                    const Ap_y = target.y + r_ap * Math.sin(anglePe + Math.PI);
+                    return {
+                        Ap: r_ap,
+                        Pe: r_pe,
+                        Ap_pos: { x: Ap_x, y: Ap_y },
+                        Pe_pos: { x: Pe_x, y: Pe_y }
+                    };
+                }
+                return {
+                    Ap: Infinity,
+                    Pe: Math.max(0, r),
+                    Ap_pos: null,
+                    Pe_pos: null
+                };
+            }
+
+            let orbitData = getOrbitPoints();
+
+            function drawTrajectory() {
+                let temp = {
+                    x: ship.x,
+                    y: ship.y,
+                    vx: ship.vx,
+                    vy: ship.vy,
+                    angle: ship.angle,
+                    thrust: 0,
+                    mass: ship.mass
+                };
+                ctx.beginPath();
+                ctx.moveTo(temp.x, temp.y);
+                for (let i = 0; i < 30000; i++) {
+                    rk4Step(temp, 0.02, 0);
+                    if (i % 3 === 0) ctx.lineTo(temp.x, temp.y);
+                }
+                ctx.strokeStyle = "rgba(0,255,0,0.5)";
+                ctx.lineWidth = 2 / scale;
+                ctx.stroke();
+            }
+
+            function drawOrbitMarkers() {
+                orbitData = getOrbitPoints();
+                if (orbitData.Ap_pos && orbitData.Pe_pos) {
+                    const drawMarker = (pos, label, color) => {
+                        const baseSize = 10;
+                        const markerActualScaleFactor = Math.pow(1 / scale, SHIP_SIZE_PERSISTENCE);
+                        const markerSize = baseSize * 0.4 * markerActualScaleFactor;
+                        const fontSize = 12 * markerActualScaleFactor;
+                        ctx.fillStyle = color;
+                        ctx.strokeStyle = "black";
+                        ctx.lineWidth = 1.5 / scale;
+                        ctx.beginPath();
+                        ctx.arc(pos.x, pos.y, markerSize, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.fillStyle = "white";
+                        ctx.font = `bold ${fontSize}px Orbitron, monospace`;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(label, pos.x, pos.y - baseSize * markerActualScaleFactor);
+                    };
+                    drawMarker(orbitData.Pe_pos, "Pe", "yellow");
+                    drawMarker(orbitData.Ap_pos, "Ap", "red");
+                }
+            }
+
+            
+            function drawMinimap() {
+                mtx.clearRect(0, 0, MAP_SIZE, MAP_SIZE);
+                mtx.save();
+                mtx.translate(MAP_CENTER_X, MAP_CENTER_Y);
+                const offsetX = SUN_CENTER_X;
+                const offsetY = SUN_CENTER_Y;
+
+                ALL_PLANETS.forEach((p) => {
+                    const p_map_x = (p.x - offsetX) / MAP_SCALE;
+                    const p_map_y = (p.y - offsetY) / MAP_SCALE;
+                    const p_map_radius = Math.max(2, p.radius / MAP_SCALE);
+
+                    mtx.beginPath();
+                    mtx.arc(p_map_x, p_map_y, p_map_radius, 0, Math.PI * 2);
+                    mtx.fillStyle = "gold"; // Minimap usa colori solidi di fallback
+                    mtx.fill();
+                });
+
+                const ship_map_x = (ship.x - offsetX) / MAP_SCALE;
+                const ship_map_y = (ship.y - offsetY) / MAP_SCALE;
+
+                mtx.beginPath();
+                mtx.arc(ship_map_x, ship_map_y, 1.5, 0, Math.PI * 2);
+                mtx.fillStyle = "red";
+                mtx.fill();
+
+                mtx.restore();
+            }
+
+            
+            function drawNavBall() {
+                navCtx.clearRect(0, 0, NAV_SIZE, NAV_SIZE);
+                navCtx.save();
+                navCtx.translate(NAV_CENTER, NAV_CENTER);
+
+                const target = ship.target;
+                const angleToTarget = Math.atan2(target.y - ship.y, target.x - ship.x);
+                const angleUp = angleToTarget - Math.PI / 2;
+
+                let rollAngle = ship.angle - angleUp;
+                while (rollAngle > Math.PI) rollAngle -= 2 * Math.PI;
+                while (rollAngle < -Math.PI) rollAngle += 2 * Math.PI;
+
+                let pitchAngle = ship.angle - angleUp - Math.PI / 2;
+                while (pitchAngle > Math.PI) pitchAngle -= 2 * Math.PI;
+                while (pitchAngle < -Math.PI) pitchAngle += 2 * Math.PI;
+
+                const pitchDegrees = ((-pitchAngle * 180) / Math.PI).toFixed(0);
+
+                document.getElementById("nav-pitch").textContent = pitchDegrees + "°";
+                document.getElementById("nav-roll").textContent = ((rollAngle * 180) / Math.PI).toFixed(0) + "°";
+                navCtx.rotate(-rollAngle);
+                navCtx.beginPath();
+                navCtx.rect(-NAV_RADIUS, 0, NAV_SIZE, NAV_RADIUS);
+                navCtx.fillStyle = "#663300";
+                navCtx.fill();
+                navCtx.beginPath();
+                navCtx.rect(-NAV_RADIUS, -NAV_RADIUS, NAV_SIZE, NAV_RADIUS);
+                navCtx.fillStyle = "#0066cc";
+                navCtx.fill();
+                navCtx.strokeStyle = "white";
+                navCtx.lineWidth = 2;
+                navCtx.beginPath();
+                navCtx.moveTo(-NAV_RADIUS, 0);
+                navCtx.lineTo(NAV_RADIUS, 0);
+                navCtx.stroke();
+                navCtx.strokeStyle = "#999999";
+                navCtx.lineWidth = 1;
+                const pitchLines = [-45, -30, -15, 15, 30, 45, 60, 75, -60, -75];
+                navCtx.font = "10px Orbitron, monospace";
+
+                pitchLines.forEach((deg) => {
+                    const rad = (deg * Math.PI) / 180;
+                    const y = -Math.sin(rad) * NAV_RADIUS;
+                    const length = Math.abs(deg) % 30 === 0 ? NAV_RADIUS * 0.5 : NAV_RADIUS * 0.3;
+
+                    navCtx.beginPath();
+                    navCtx.moveTo(-length / 2, y);
+                    navCtx.lineTo(length / 2, y);
+                    navCtx.stroke();
+
+                    if (Math.abs(deg) % 30 === 0) {
+                        navCtx.fillStyle = "white";
+                        navCtx.textAlign = "left";
+                        navCtx.fillText(Math.abs(deg), length / 2 + 3, y + 4);
+                    }
+                });
+
+                navCtx.restore();
+
+                const anglePrograde = Math.atan2(ship.vy, ship.vx);
+
+                let angleDiffPrograde = anglePrograde - ship.angle;
+                while (angleDiffPrograde > Math.PI) angleDiffPrograde -= 2 * Math.PI;
+                while (angleDiffPrograde < -Math.PI) angleDiffPrograde += 2 * Math.PI;
+
+                let angleDiffTarget = angleToTarget - ship.angle;
+                while (angleDiffTarget > Math.PI) angleDiffTarget -= 2 * Math.PI;
+                while (angleDiffTarget < -Math.PI) angleDiffTarget += 2 * Math.PI;
+
+                function drawMarker(angleDiff, color, shapeFunc) {
+                    const dist = 0.9 * NAV_RADIUS;
+                    const finalX = NAV_CENTER + dist * Math.cos(angleDiff);
+                    const finalY = NAV_CENTER + (dist * dist * Math.sin(angleDiff)) / NAV_RADIUS;
+                    navCtx.save();
+                    navCtx.translate(finalX, finalY);
+                    navCtx.fillStyle = color;
+                    navCtx.strokeStyle = "black";
+                    navCtx.lineWidth = 1;
+                    shapeFunc(navCtx);
+                    navCtx.restore();
+                }
+
+                drawMarker(angleDiffPrograde, "lime", (ctx) => {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                });
+
+                drawMarker(angleDiffPrograde + Math.PI, "red", (ctx) => {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(-5, -5);
+                    ctx.lineTo(5, 5);
+                    ctx.moveTo(5, -5);
+                    ctx.lineTo(-5, 5);
+                    ctx.stroke();
+                });
+
+                drawMarker(angleDiffTarget, "gold", (ctx) => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, -7);
+                    ctx.lineTo(7, 0);
+                    ctx.lineTo(0, 7);
+                    ctx.lineTo(-7, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                });
+
+                navCtx.fillStyle = "white";
+                navCtx.strokeStyle = "black";
+                navCtx.lineWidth = 1;
+                navCtx.beginPath();
+                navCtx.moveTo(NAV_CENTER + 10, NAV_CENTER);
+                navCtx.lineTo(NAV_CENTER - 10, NAV_CENTER - 5);
+                navCtx.lineTo(NAV_CENTER - 10, NAV_CENTER + 5);
+                navCtx.closePath();
+                navCtx.fill();
+                navCtx.stroke();
+            }
+
+            function updateUI() {
+                
+             if (currentExperiment) {
+    const elapsed = gameTime - currentExperiment.startTime;
+    // const remaining = currentExperiment.duration - elapsed; // Non usata nel log, ma puoi aggiungerla se vuoi.
+    const expData = EXPERIMENTS[currentExperiment.type];
+    
+    // Calcola la percentuale e il tempo rimanente da mostrare
+    const percent = ((elapsed / currentExperiment.duration) * 100).toFixed(0);
+    const remainingSeconds = (currentExperiment.duration - elapsed);
+
+    // Aggiorna lo stato nel pannello esperimenti
+    addLog(`In corso... ${percent}%`, 'lime');
+    
+    // Ottiene tutti i pulsanti degli esperimenti
+    const tempButton = document.getElementById('run-temp-exp');
+    const pressButton = document.getElementById('run-press-exp');
+    const radButton = document.getElementById('run-rad-exp');     // ⭐ NUOVO
+    const sampleButton = document.getElementById('run-sample-exp'); // ⭐ NUOVO
+
+    // Aggiorna i colori di tutti i pulsanti per riflettere quale è attivo
+    // Si usa il ternario per impostare il colore attivo o quello disabilitato (#555)
+    if (tempButton && pressButton && radButton && sampleButton) {
+        const activeColor = '#FFCC00'; // Giallo/Oro per attivo
+        const disabledColor = '#555';   // Grigio per disabilitato
+        
+        tempButton.style.backgroundColor = (currentExperiment.type === 'temp') ? activeColor : disabledColor;
+        pressButton.style.backgroundColor = (currentExperiment.type === 'press') ? activeColor : disabledColor;
+        radButton.style.backgroundColor = (currentExperiment.type === 'rad') ? activeColor : disabledColor;       // ⭐ AGGIORNATO
+        sampleButton.style.backgroundColor = (currentExperiment.type === 'sample') ? activeColor : disabledColor; // ⭐ AGGIORNATO
+    }
+
+} else {
+    // Resetta lo stato se nessun esperimento è in corso
+    addLog('...', '#777');
+    
+    // Ottiene tutti i pulsanti per resettarli
+    const tempButton = document.getElementById('run-temp-exp');
+    const pressButton = document.getElementById('run-press-exp');
+    const radButton = document.getElementById('run-rad-exp');
+    const sampleButton = document.getElementById('run-sample-exp');
+    
+    const baseColor = '#3f6f3f'; // Verde Scienza
+
+    // Resetta tutti i colori al colore base
+    if (tempButton && pressButton && radButton && sampleButton) {
+        tempButton.style.backgroundColor = baseColor; 
+        pressButton.style.backgroundColor = baseColor;
+        radButton.style.backgroundColor = baseColor;     // ⭐ AGGIORNATO
+        sampleButton.style.backgroundColor = baseColor; // ⭐ AGGIORNATO
+    }
+}
+
+ 
+    
+                
+                const target = ship.target;
+                const dx = ship.x - target.x;
+                const dy = ship.y - target.y;
+                const r = Math.hypot(dx, dy); // Distanza (Raggio) attuale dal Target
+                const v_x = ship.vx;
+                const v_y = ship.vy;
+                const speed = Math.hypot(v_x, v_y); // Velocità attuale della ship
+                const currentAccel = totalAccel(ship.x, ship.y, ship.angle, ship.thrust);
+                const G_REF = 0.0098; // Valore di riferimento per g (arbitrario o reale)
+                const accel = Math.hypot(currentAccel.ax, currentAccel.ay);
+                const gForce = (accel / G_REF).toFixed(2);
+                const mu = G * target.mass;
+                const v2 = speed * speed;
+                const energy = v2 / 2 - mu / r;
+    document.getElementById("dist").textContent = r.toFixed(2);
+
+                let orbitStatus;
+                if (energy < -1e-5) {
+                    orbitStatus = "Orbita Stabile";
+                } else if (energy > 1e-5) {
+                    orbitStatus = "Fuga";
+                } else {
+                    orbitStatus = "Cambiamento";
+                }
+
+                let orbPeriod = "N/A";
+                if (energy < -1e-5) {
+                    const a = -mu / (2 * energy);
+                    orbPeriod = (2 * Math.PI * Math.sqrt(Math.pow(a, 3) / mu)).toFixed(2);
+                }
+
+                const Pe_val =
+                    orbitData.Pe < 0 || orbitData.Pe === -Infinity
+                        ? r.toFixed(2)
+                        : orbitData.Pe === Infinity
+                          ? "Fuga"
+                          : orbitData.Pe.toFixed(2);
+                const Ap_val = orbitData.Ap === Infinity || orbitData.Ap <= 0 ? "Fuga" : orbitData.Ap.toFixed(2);
+                const altitude = Math.max(0, r - target.radius);
+                const V_circ = Math.sqrt(mu / r);
+                const V_esc = Math.sqrt((2 * mu) / r);
+                const fixedThrottlePercent = (fixedThrottle * 100).toFixed(0);
+                const actualThrustPercent = (ship.thrust * 100).toFixed(0);
+
+                document.getElementById("dist").textContent = r.toFixed(2);
+                document.getElementById("speed").textContent = speed.toFixed(2);
+                document.getElementById("thrust").textContent = actualThrustPercent + "%";
+                document.getElementById("accel").textContent = gForce;
+                document.getElementById("energy").textContent = energy.toFixed(4);
+                document.getElementById("orbPeriod").textContent = orbPeriod;
+                document.getElementById("Pe").textContent = Pe_val;
+                document.getElementById("Ap").textContent = Ap_val;
+
+                document.getElementById("target").textContent = target.name;
+                document.getElementById("orbitStatus").textContent = orbitStatus;
+
+                document.getElementById("Vesc").textContent = V_esc.toFixed(2);
+
+                document.getElementById("throttle-display").textContent = fixedThrottlePercent + "%";
+                document.getElementById("throttle-slider").value = (fixedThrottle * 100).toFixed(0);
+
+                const warpElement = document.getElementById("warp");
+                warpElement.textContent = `${timeWarp}x`;
+                warpElement.style.color = "#FFFFFF";
+
+                const sun = planet2;
+                const dx_sun = ship.x - sun.x;
+                const dy_sun = ship.y - sun.y;
+                const distToSun = Math.hypot(dx_sun, dy_sun);
+
+                const isObstructed = isSunObstructed(ship, sun, ALL_PLANETS);
+                const solarEffectiveness = Math.min(
+                    1.0,
+                    (SOLAR_DISTANCE_REFERENCE * SOLAR_DISTANCE_REFERENCE) / (distToSun * distToSun)
+                );
+                const activeBars = Math.ceil(solarEffectiveness * EC_TIERS);
+
+                const chargeRateElement = document.getElementById("charge-rate"); // Nuovo ID HTML
+                const netRate = currentChargeRate;
+
+                if (netRate > 0.05 && electricCharge < MAX_ELECTRIC_CHARGE) {
+                    chargeRateElement.textContent = `+${netRate.toFixed(1)} A`;
+                    chargeRateElement.style.color = "lime";
+                    chargeRateElement.style.fontWeight = "bold";
+                } else if (netRate < -0.05 && electricCharge > 0) {
+                    chargeRateElement.textContent = `${netRate.toFixed(1)} A`;
+                    chargeRateElement.style.color = "red";
+                    chargeRateElement.style.fontWeight = "bold";
+                } else {
+                    chargeRateElement.textContent = "0.0 A";
+                    chargeRateElement.style.color = "#777";
+                    chargeRateElement.style.fontWeight = "normal";
+                }
+
+                document.getElementById("battery-charge").textContent =
+                    new Intl.NumberFormat("it-IT", {
+                        maximumFractionDigits: 0
+                    }).format(electricCharge) + " Ah";
+
+                const batteryPercent = (electricCharge / MAX_ELECTRIC_CHARGE) * 100;
+                const batteryBarFill = document.getElementById("battery-bar-fill"); // Nuovo ID per la barra principale
+                if (batteryBarFill) {
+                    batteryBarFill.style.height = Math.max(0, batteryPercent).toFixed(0) + "%";
+                }
+
+                const solarBarsContainer = document.getElementById("solar-bars");
+                const solarBarsColor = isObstructed ? "red" : activeBars > 0 && !isObstructed ? "#FFCC00" : "#333";
+
+                if (solarBarsContainer) {
+                    solarBarsContainer.innerHTML = "";
+
+                    for (let i = 1; i <= EC_TIERS; i++) {
+                        const bar = document.createElement("div");
+                        bar.className = "solar-bar";
+
+                        if (i <= activeBars) {
+                            bar.style.backgroundColor = solarBarsColor;
+                        } else {
+                            bar.style.backgroundColor = "#333";
+                        }
+                        solarBarsContainer.appendChild(bar);
+                    }
+                }
+            }
+            function loop() {
+                ctx.save();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                let focusX = ship.x;
+                let focusY = ship.y;
+
+                if (cameraTarget === "target") {
+                    focusX = ship.target.x;
+                    focusY = ship.target.y;
+                }
+
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(scale, scale);
+                ctx.translate(-focusX, -focusY);
+
+                ctx.filter = "blur(0.5px)";
+
+                drawTrajectory();
+                drawOrbitMarkers();
+
+                if (!paused) update();
+
+                ALL_PLANETS.forEach((p) => drawPlanet(p));
+                drawShip();
+
+                ctx.filter = "none";
+
+                updateUI();
+                ctx.restore();
+
+                drawMinimap();
+                drawNavBall();
+
+                requestAnimationFrame(loop);
+                
+            }
+
+            // ... (Associa i pulsanti alla funzione startExperiment - Aggiungi questo)
+// ... (Dopo i listener esistenti)
+document.getElementById('run-temp-exp').addEventListener('click', () => startExperiment('temp'));
+document.getElementById('run-press-exp').addEventListener('click', () => startExperiment('press'));
+
+// ⭐ NUOVI LISTENER:
+document.getElementById('run-rad-exp').addEventListener('click', () => startExperiment('rad'));
+document.getElementById('run-sample-exp').addEventListener('click', () => startExperiment('sample'));
+
+            loop();
+        </script>
+    </body>
+</html>
