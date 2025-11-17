@@ -1,88 +1,62 @@
-🌟 Caratteristiche Principali
+# 🌟 Caratteristiche Principali
 
-1. Motore Fisico e Simulazione
-Gravità N-Body (Semplificata): Simulazione dell'attrazione gravitazionale esercitata da più corpi celesti (Sole, Mercurio, Terra, Marte, Giove).
+## 🚀 1. Motore Fisico e Simulazione
+Il cuore del progetto si basa su una simulazione fisica robusta per garantire un'esperienza di volo realistica.
+* **Gravità N-Body (Semplificata):** Simulazione dell'attrazione gravitazionale esercitata da più corpi celesti contemporaneamente (Sole, Mercurio, Terra, Marte, Giove).
+* **Integratore Runge-Kutta 4 (RK4):** Algoritmo utilizzato per calcolare con precisione la posizione futura della nave e disegnare le linee di traiettoria predittiva, visualizzando **Periapside (Pe)** e **Apoapside (Ap)**.
+* **Time Warp:** Sistema di accelerazione temporale (fino a `256x`) per ridurre i tempi di attesa durante i viaggi interplanetari mantenendo la stabilità della simulazione.
 
-Integratore Runge-Kutta 4 (RK4): Utilizzato per calcolare con precisione la posizione futura della nave e disegnare le linee di traiettoria predittiva, mostrando visivamente Periapside (Pe) e Apoapside (Ap).
+## 🧭 2. Avionica e Controlli di Volo (SAS)
+**Sistema SAS (Stability Assist System):** Un autopilota avanzato in grado di orientare automaticamente la nave.
+* 🔴 **Target:** Punta verso il corpo celeste selezionato.
+* 🟢 **Prograde / Retrograde:** Allineamento col vettore velocità (ottimale per accelerare o frenare).
+* 🔵 **Normal / Antinormal:** Essenziale per i cambi di inclinazione orbitale.
 
-Time Warp: Sistema di accelerazione temporale (fino a 256x) per ridurre i tempi di attesa durante i viaggi interplanetari senza perdere stabilità nella simulazione.
+> **Strumentazione:** Include una **NavBall** funzionante (orizzonte artificiale su Canvas) che ruota in tempo reale mostrando Pitch, Roll e i vettori di manovra.
 
-//////////////////////
+## ⚡ 3. Gestione Risorse e Sistemi
+La gestione delle risorse è critica per la sopravvivenza della missione.
 
-2. Avionica e Controlli di Volo (SAS)
-Sistema SAS (Stability Assist System): Autopilota in grado di orientare automaticamente la nave verso vettori specifici:
+### Sistema Elettrico (EC)
+* Generazione tramite pannelli solari basata sulla distanza dalla stella (Inverse Square Law).
+* **Raycasting per Eclissi:** I pannelli smettono di caricare se un pianeta oscura il Sole.
+* Consumo dinamico basato sull'uso del SAS e degli esperimenti.
 
-🔴 Target: Punta verso il corpo celeste selezionato.
+### Propulsione
+* **Fisica a Massa Variabile:** Il consumo di carburante riduce la massa totale della nave, influenzando il Delta-V e l'accelerazione.
+* Spegnimento automatico dei motori all'esaurimento del propellente liquido.
 
-🟢 Prograde/Retrograde: Allineamento col vettore velocità (per accelerare o frenare).
+## 🔬 4. Modulo Scientifico (Novità v15)
+Un pannello interattivo per l'esecuzione di esperimenti *in-situ*.
+* **Tipologie:** Rilevamento Temperatura, Pressione, Radiazioni e Qualità dell'aria.
+* **Logica Contestuale:** I risultati cambiano in base all'altitudine (es. vuoto dello spazio vs atmosfera) e alla vicinanza al Sole.
+* **Log:** Un registro scorrevole storico dei dati raccolti.
 
-🔵 Normal/Antinormal: Per cambi di inclinazione orbitale.
+## 🎨 Interfaccia Utente (UI/UX)
+Stile **"Retrò-Tech"** scuro con font *Orbitron*, ispirato ai display LCD delle vere strumentazioni spaziali.
+* **HUD Modulare:** Pannelli semitrasparenti con bordi luminosi per Telemetria, Risorse e Controlli.
+* **Minimappa Radar:** Visualizzazione tattica della posizione relativa dei pianeti.
+* **Feedback Visivo:** Effetti particellari per i motori e gradienti dinamici per le barre delle risorse.
 
-NavBall Funzionante: Orizzonte artificiale disegnato su Canvas che ruota in tempo reale mostrando Pitch, Roll e i vettori di manovra.
+## 🛠 Stack Tecnologico
+Il progetto è costruito senza engine grafici pesanti, utilizzando tecnologie web native.
 
-Controllo Manetta: Slider analogico per la spinta continua e controlli da tastiera (W/S) per impulsi rapidi.
+| Componente | Tecnologia | Utilizzo |
+| :--- | :--- | :--- |
+| **Rendering** | `HTML5 Canvas` | Rendering del gioco e della strumentazione complessa (NavBall). |
+| **Logica** | `JavaScript (ES6)` | Moduli nativi, loop di gioco, calcoli vettoriali e fisica. |
+| **Styling** | `CSS3` | Layout Flexbox/Grid per l'overlay dell'interfaccia (HUD). |
 
-//////////////////////
+## 🎮 Comandi
 
-3. Gestione Risorse e Sistemi
-Sistema Elettrico (EC): Gestione realistica della carica elettrica.
+| Tasto | Azione |
+| :--- | :--- |
+| `W` / `S` | Spinta massima momentanea / Taglio motore (Cutoff) |
+| `A` / `D` | Rotazione nave (Yaw) |
+| `Cursore` | Imposta Throttle fisso (Manetta) |
+| `Click (UI)` | Attiva modalità SAS |
+| `<` / `>` | Diminuisce / Aumenta il Time Warp |
+| `Rotella Mouse` | Zoom In / Out |
 
-I pannelli solari generano energia in base alla distanza dal Sole.
-
-Implementazione del Raycasting per simulare le eclissi (i pannelli non caricano se un pianeta oscura il Sole).
-
-Il consumo aumenta usando il SAS o eseguendo esperimenti.
-
-Propellente Liquido: Il carburante si consuma in base alla spinta; l'esaurimento porta allo spegnimento dei motori e alla riduzione della massa della nave (fisica a massa variabile).
-
-//////////////////////
-
-4. Modulo Scientifico (Novità v15)
-Un pannello dedicato all'esecuzione di esperimenti scientifici in base alla posizione della nave:
-
-Tipologie: Rilevamento Temperatura, Pressione, Radiazioni e Qualità dell'aria.
-
-Logica: I risultati variano in base all'altitudine e al pianeta (es. rilevare "Vuoto" nello spazio profondo o alte temperature vicino al Sole).
-
-Costo Energetico: Ogni esperimento consuma batteria e richiede tempo per essere completato.
-
-Log Risultati: Un registro scorrevole mostra lo storico dei dati raccolti.
-
-//////////////////////
-
-🎨 Interfaccia Utente (UI/UX)
-L'interfaccia è progettata con uno stile "Retrò-Tech" scuro, utilizzando il font Orbitron per richiamare i display LCD delle strumentazioni spaziali.
-
-HUD Modulare: Pannelli semitrasparenti con bordi luminosi per Telemetria, Risorse, Missione e Controlli.
-
-Minimappa Radar: Visualizzazione tattica della posizione relativa dei pianeti e della nave.
-
-Feedback Visivo: Effetti particellari per la scia del motore, gradienti dinamici per le barre delle risorse e indicatori di stato colorati.
-
-//////////////////////
-
-🛠 Stack Tecnologico
-HTML5 Canvas: Utilizzato sia per il rendering del gioco (#game), sia per la strumentazione complessa (NavBall, Minimappa).
-
-JavaScript (ES6 Modules): Logica di gioco pura senza framework esterni. Gestione del loop di gioco, input handling e calcoli matematici vettoriali.
-
-CSS3: Layout flessibile (Flexbox/Grid) per posizionare i pannelli dell'interfaccia sopra il canvas (Overlay).
-
-//////////////////////
-
-🎮 Comandi
-W / S: Spinta massima momentanea / Taglio motore.
-
-A / D: Rotazione nave (Yaw).
-
-Cursore Throttle: Imposta una spinta fissa.
-
-Click su SAS: Attiva le modalità di autopilota.
-
-< / >: Diminuisce/Aumenta il Time Warp.
-
-Rotella Mouse: Zoom In/Out.
-
-//////////////////////
-
-Stato del progetto: Funzionante, versione 15 (UI Stabile e Modulo Scientifico implementato).
+---
+**Stato del progetto:** 🟢 Funzionante (v15) - UI Stabile e Modulo Scientifico implementato.
