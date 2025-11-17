@@ -1,0 +1,523 @@
+  /* * FONT PERSONALIZZATO IN STILE LCD/TECNOLOGICO */
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+            body{
+                margin:0;
+                overflow:hidden;
+                background:#000;
+                color:#fff;
+                font-family: 'Orbitron', monospace; /* Questo assicura che l'UI HTML sia corretta */
+                background-image: url(stars.jpg); /* Immagine di sfondo */
+            }
+            canvas{display:block}
+
+            /* * STILE GENERALE PER TUTTI I PANNELLI */
+            .ksp-panel {
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                padding: 10px;
+                box-sizing: border-box;
+                font-size: 14px;
+            }
+            .label {
+                color: #99FF99;
+                font-weight: 500;
+            }
+            .ui-group {
+                margin-bottom: 8px;
+            }
+            .ksp-panel hr { border-color: #555; margin: 8px 0; }
+
+            /* ------------------------------------------- */
+            /* NUOVI POSIZIONAMENTI UI */
+            /* ------------------------------------------- */
+
+            /* 1. TOP-CENTER: HUD Primario (Pitch, Roll, Warp) */
+            #top-center-hud {
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 280px; /* AUMENTATO per Pitch e Roll sulla stessa linea */
+                padding: 10px 15px;
+                text-align: center;
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                z-index: 100;
+            }
+            #pitch-roll-container {
+                justify-content: space-between;
+                font-size: 1.1em;
+                font-weight: bold;
+                color: #00FF00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                margin-bottom: 5px;
+            }
+
+            /* Stile Time Warp - Reso più compatto */
+            #warp-control-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 5px;
+                gap: 5px;
+                color: #00AAFF;
+            }
+            #warp {
+                font-size: 1.3em;
+                font-weight: bold;
+                min-width: 40px;
+                text-align: center;
+                color: white;
+            }
+            .warp-button {
+                background: #555;
+                color: white;
+                border: none;
+                padding: 3px 8px;
+                cursor: pointer;
+                border-radius: 4px;
+                font-size: 16px;
+                line-height: 1;
+                transition: background 0.1s;
+                outline: none;
+            }
+            .warp-button:hover {
+                background: #888;
+            }
+
+            /* 2. TOP-LEFT: Mission Status */
+            #mission-status-box { position: absolute; top: 10px; left: 10px; width: 200px; padding: 8px; }
+
+            /* 3. TOP-RIGHT: Telemetria Critica */
+            #critical-telemetry-box { position: absolute; top: 10px; right: 10px; width: 180px; text-align: right; padding: 8px; }
+
+            /* 4. BOTTOM-RIGHT: Dettagli Orbitali */
+            #detailed-telemetry-box { position: absolute; top: 10px; right: 210px; width: 220px; padding: 10px; }
+
+            /* 5. BOTTOM-LEFT: Minimappa & Controlli Focus */
+            #minimap-group {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #camera-focus-controls {
+                display: flex;
+                gap: 5px;
+                margin-bottom: 5px;
+            }
+            .focus-button {
+                background: #333;
+                color: white;
+                border: 2px solid #555;
+                padding: 4px 8px;
+                cursor: pointer;
+                border-radius: 4px;
+                font-family: 'Orbitron', monospace;
+                font-size: 11px;
+                font-weight: bold;
+            }
+            .focus-button.active {
+                background: #00AAFF;
+                border-color: white;
+                color: black;
+                box-shadow: 0 0 5px #00AAFF;
+            }
+            #minimap-container {
+                border: 3px solid #666;
+                background: rgba(40, 40, 40, 0.9);
+                border-radius: 8px;
+                padding: 5px;
+            }
+
+
+            /* 6. BOTTOM-CENTER: Pannello Avionica Orizzontale (SAS + NavBall) */
+            #avionics-panel-wrapper {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: flex-end;
+            }
+
+            #avionics-panel {
+                display: flex;
+                background: rgba(25, 25, 25, 0.95);
+                border: 4px solid #444;
+                border-radius: 10px;
+                box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 0, 0.15);
+                padding: 10px;
+            margin-left: 90px;
+                }
+
+            /* Griglia SAS a sinistra (3x2) */
+            #sas-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 45px);
+                gap: 5px;
+                padding-right: 15px;
+                padding-bottom: 5px;
+                height: 100px;
+            }
+
+            .sas-button {
+                width: 45px;
+                height: 45px;
+                background: #333;
+                color: #eee;
+                border: 2px solid #555;
+                border-radius: 5px;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.1s, border-color 0.1s;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                font-size: 9px;
+                font-family: 'Orbitron', monospace;
+                z-index: 20;
+                padding: 1px;
+                box-sizing: border-box;
+            }
+            .sas-button:hover { background: #444; border-color: #999; }
+            .sas-button.active { background: #00FF00; color: black; border-color: white; box-shadow: 0 0 8px #00FF00; }
+            .sas-icon { font-size: 18px; font-weight: bold; line-height: 1; }
+            .sas-label { font-size: 8px; font-weight: bold; line-height: 1; margin-top: 1px; }
+
+            /* NavBall a Destra - RIDOTTO A 125px */
+            #navball-container {
+                width: 100px;
+                height: 100px;
+                border: 5px solid #666;
+                border-radius: 50%;
+                overflow: hidden;
+                background: #111;
+                position: relative;
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 255, 255, 0.1);
+                z-index: 10;
+            }
+
+                /* ------------------------------------------- */
+            /* 7. SLIDER MANETTA (Throttle) */
+            /* ------------------------------------------- */
+            #throttle-control {
+                position: absolute;
+                top: 50%; /* Centro verticale */
+                left: 10px; /* Bordo sinistro */
+                transform: translateY(-50%); /* Sposta verso l'alto della metà della sua altezza */
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                padding: 10px 5px;
+                z-index: 100;
+                width: 30px; /* Larghezza del pannello */
+                height: 300px; /* Altezza del pannello */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #throttle-display {
+                font-weight: bold;
+                margin-bottom: 5px;
+                font-size: 1em;
+            }
+
+            /* Stile Personalizzato per il Range Slider Verticale */
+            /* Stile Personalizzato per il Range Slider Verticale */
+            /* ------------------------------------------- */
+            /* 7. SLIDER MANETTA (Throttle) - Orizzontale a Sinistra */
+            /* ------------------------------------------- */
+            /* ------------------------------------------- */
+            /* NUOVI BLOCCHI RISORSE */
+            /* ------------------------------------------- */
+
+            /* 8. BARRE RISORSE (Carburante, Oxidizer, Monoprop) */
+            #resource-display {
+                position: absolute;
+                top: 50%; /* Allineato verticalmente con la Manetta */
+                left: 215px; /* Posizionato appena a destra del pannello Manetta (200px + margine) */
+                transform: translateY(-50%);
+                z-index: 100;
+
+                /* Nuovo pannello contenitore per le barre */
+                display: flex;
+                flex-direction: column;
+                gap: 10px; /* Spazio tra le barre */
+
+                background: rgba(40, 40, 40, 0.9);
+                border: 3px solid #666;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                padding: 8px;
+            }
+
+            .resource-bar-container {
+                width: 25px; /* Larghezza delle barre verticali */
+                height: 150px; /* Altezza totale della barra */
+                background: #111;
+                border: 1px solid #444;
+                border-radius: 4px;
+                position: relative;
+                display: flex;
+                flex-direction: column-reverse; /* Riempimento dal basso verso l'alto */
+                overflow: hidden;
+            }
+            .resource-bar-container .label {
+                position: absolute;
+                top: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 9px;
+                font-weight: bold;
+                color: #99FF99;
+            }
+            .resource-fill {
+                width: 100%;
+                /* L'altezza sarà controllata via JavaScript/inline style per simulare il livello */
+                transition: height 0.5s ease-out;
+            }
+            /* Colori Specifici KSP-Style */
+            #lf-fill { background: #00AAFF; } /* Blu - Liquid Fuel */
+            #ox-fill { background: #FF3333; } /* Rosso - Oxidizer */
+            #rcs-fill { background: #00FFCC; } /* Ciano/Aqua - Monopropellant */
+
+            /* 9. PANNELLO ENERGIA (Sotto Telemetria Critica) */
+            #electric-panel-box {
+                position: absolute;
+                bottom: 370px; /* Spostato sotto critical-telemetry-box (circa 10px + 180px altezza) */
+                right: 10px;
+                width: 180px;
+                text-align: right;
+                padding: 8px;
+            }
+            #battery-charge {
+                font-size: 1.1em;
+                font-weight: bold;
+                color: #FFD700; /* Giallo per l'energia */
+            }
+
+            /* ⭐ Regola il posizionamento del pannello Manetta per fare spazio */
+            #throttle-control {
+                position: absolute;
+            top:45px;
+                left: 0px;
+                transform: translateY(-50%);
+                width: 50px; /* Ridotta la larghezza per renderlo verticale */
+                height: 140px; /* Reso verticale */
+                padding: 20px 10px;
+                background-color: #444;
+                /* Ri-orientato in verticale */
+                flex-direction: column-reverse; /* Slider in basso, display in alto */
+                justify-content: space-between;
+                align-items: center;
+                margin-left: 0;
+                margin-top: 0;
+            }
+            #throttle-slider {
+                /* Riporta lo slider in verticale ruotandolo */
+                -webkit-appearance: slider-vertical;
+                -moz-appearance: slider-vertical;
+                appearance: slider-vertical;
+
+                transform: rotate(180deg); /* Rotato per riempire dal basso */
+                width: 10px;
+                height: 90%;
+                margin: 0;
+
+                background: transparent;
+                cursor: pointer;
+            }
+            /* Regola lo stile della traccia per verticale */
+            #throttle-slider::-webkit-slider-runnable-track {
+                width: 10px;
+                height: 100%;
+                background: linear-gradient(to top, #444, #888);
+            }
+            #throttle-slider::-moz-range-track {
+                width: 10px;
+                height: 100%;
+                background: linear-gradient(to top, #444, #888);
+            }
+            /* Regola lo stile del thumb per verticale */
+            /* Regola lo stile del thumb per verticale */
+            #throttle-slider::-webkit-slider-thumb {
+                /* I margini rimangono come li hai impostati */
+                margin-top: 0;
+                margin-left: -5px;
+
+                /* ⭐ NUOVO COLORE DI DEFAULT (A riposo) */
+                background: #CCCCCC; /* Esempio: Grigio metallico */
+
+                /* Rimuovi !important se non strettamente necessario, altrimenti lascialo */
+                /* background: #CCCCCC !important; */
+
+                border: 1px solid #999; /* Aggiunge un bordo per renderlo più visibile */
+                width: 20px;
+                height: 20px;
+                border-radius: 49%;
+            }
+
+            #throttle-slider::-moz-range-thumb {
+                /* I margini rimangono come li hai impostati */
+                margin-top: 0;
+                margin-left: -5px;
+
+                /* ⭐ NUOVO COLORE DI DEFAULT (A riposo) */
+                background: #CCCCCC; /* Esempio: Grigio metallico */
+
+                /* Rimuovi !important se non strettamente necessario, altrimenti lascialo */
+                /* background: #CCCCCC !important; */
+
+                border: 1px solid #999;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+            }
+            #throttle-control .label {
+                order: 2; /* Sposta l'etichetta in basso (visivamente) */
+            }
+            #throttle-display {
+                order: 1; /* Sposta il display in alto */
+            }
+
+                .solar-indicator {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 2px;
+            }
+
+            .solar-bar {
+                width: 8px;
+                height: 10px;
+                margin-left: 2px;
+                background-color: #333;
+                border: 1px solid #000;
+                transition: background-color 0.3s;
+                border-radius: 1px;
+            }
+
+                /* Stile Tasso di Carica/Scarica (Charge Rate) */
+            #charge-rate {
+                font-family: 'Orbitron', monospace;
+                font-size: 11px;
+                width: 100px;
+                text-align: right;
+            }
+
+            /* Stile Barra Principale Batteria (facoltativo, ma utile per il visual) */
+            #battery-main-bar {
+                border-radius: 2px;
+            }
+            #battery-bar-fill {
+                /* La transizione è già inline, ma puoi definirla qui se preferisci */
+                border-radius: 2px;
+                background-color: #0088CC; /* Blu per l'energia */
+            }
+
+#experiments-panel {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    padding: 10px;
+    z-index: 10;
+}
+
+#experiment-status {
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #333;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.exp-button {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+    background-color: #3f6f3f; /* Verde Scienza */
+    border: none!important;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: none!important;
+}
+
+.exp-button:hover:not(:disabled) {
+    background-color: #5aa15a;
+}
+
+.exp-button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+.log-box {
+    margin-top: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    max-height: 75px;
+    height: 75px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    background-color: #111;
+    font-size: 0.8em;
+}
+
+.log-entry {
+    border-bottom: 1px dotted #333;
+    padding: 2px 0;
+}
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+/* --- STILI SCROLLBAR AGGIUNTI QUI --- */
+.log-box::-webkit-scrollbar {
+    width: 8px; /* Larghezza della barra verticale */
+}
+
+.log-box::-webkit-scrollbar-track {
+    background: #1e1e1e; /* Sfondo della traccia della barra (molto scuro) */
+    border-radius: 10px;
+}
+
+.log-box::-webkit-scrollbar-thumb {
+    background: #4a4a4a; /* Colore del "pollice" (la parte che si muove) */
+    border-radius: 10px;
+}
+
+.log-box::-webkit-scrollbar-thumb:hover {
+    background: #6e6e6e; /* Colore al passaggio del mouse */
+}
+            
+            #audio-toggle-button {
+    position: absolute;
+    top: 10px; /* Distanza dall'alto */
+    right: 10px; /* Distanza da destra */
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #555;
+    color: white;
+    border: 2px solid #aaa;
+    border-radius: 5px;
+    z-index: 100; /* Assicurati che sia sopra il canvas */
+    padding: 0;
+}
+
+#audio-toggle-button.active {
+    background-color: #3f6f3f; /* Colore attivo (verde scienza) */
+}
