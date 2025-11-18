@@ -1,4 +1,6 @@
+<img width="1280" height="640" alt="repository-open-graph-template" src="https://github.com/user-attachments/assets/936f1706-3309-443e-912c-8476e24a6568" />
 # 🌟 Caratteristiche Principali
+
 
 ## 🚀 1. Motore Fisico e Simulazione
 Il cuore del progetto si basa su una simulazione fisica robusta per garantire un'esperienza di volo realistica.
