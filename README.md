@@ -1,4 +1,5 @@
-<img width="1280" height="640" alt="repository-open-graph-template" src="https://github.com/user-attachments/assets/936f1706-3309-443e-912c-8476e24a6568" />
+<img width="563" height="380" alt="Screenshot 2025-11-18 174353" src="https://github.com/user-attachments/assets/1518e506-c031-4a75-9740-c22a3e053954" />
+
 # 🌟 Caratteristiche Principali
 
 
