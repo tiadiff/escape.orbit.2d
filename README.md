@@ -15,15 +15,22 @@ Il cuore del progetto si basa su una simulazione fisica robusta per garantire un
 * 🟢 **Prograde / Retrograde:** Allineamento col vettore velocità (ottimale per accelerare o frenare).
 * 🔵 **Normal / Antinormal:** Essenziale per i cambi di inclinazione orbitale.
 
+<img width="448" height="220" alt="image" src="https://github.com/user-attachments/assets/aaf8a372-dce6-487d-b72e-7164089f1c23" />
+
+
 > **Strumentazione:** Include una **NavBall** funzionante (orizzonte artificiale su Canvas) che ruota in tempo reale mostrando Pitch, Roll e i vettori di manovra.
 
 ## ⚡ 3. Gestione Risorse e Sistemi
 La gestione delle risorse è critica per la sopravvivenza della missione.
 
+<img width="442" height="177" alt="image" src="https://github.com/user-attachments/assets/312688e8-8208-40b2-86c0-ff92b898e6f7" />
+
 ### Sistema Elettrico (EC)
 * Generazione tramite pannelli solari basata sulla distanza dalla stella (Inverse Square Law).
 * **Raycasting per Eclissi:** I pannelli smettono di caricare se un pianeta oscura il Sole.
 * Consumo dinamico basato sull'uso del SAS e degli esperimenti.
+
+  <img width="202" height="141" alt="image" src="https://github.com/user-attachments/assets/0b97caf0-be6c-4e8f-b6c6-e465cbf5b3b7" />
 
 ### Propulsione
 * **Fisica a Massa Variabile:** Il consumo di carburante riduce la massa totale della nave, influenzando il Delta-V e l'accelerazione.
